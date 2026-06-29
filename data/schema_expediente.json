@@ -1,0 +1,58 @@
+{
+  "header": {
+    "fecha": "2026-06-28T17:53:53.000Z",
+    "perfil": "julio"
+  },
+  "metadatos_sesion": {
+    "duracion_min": 0,
+    "tonelaje_total_kg": 0,
+    "escala_titanes": "Ninguna",
+    "comparativa_real": "",
+    "estado_sistema": "ZEN_LOCKED"
+  },
+  "auditoria_fuerza": [
+    {
+      "id_ejercicio": "press_banca_plano",
+      "patron_biomecanico": "Empuje Horizontal",
+      "tempo_ejecucion": "3-0-1",
+      "cues_mentales": "Escápulas retraídas, leg drive",
+      "siseo": "Exhalación explosiva al empuje",
+      "series": [
+        {
+          "serie_num": 1,
+          "peso_kg": 0.0,
+          "repeticiones": 0,
+          "rir": 0,
+          "aditamento": "ninguno",
+          "timestamp": "2026-06-28T17:53:53.000Z"
+        }
+      ]
+    }
+  ],
+  "auditoria_longevidad": {
+    "test_fatmax": {
+      "fecha_medicion": null,
+      "frecuencia_cardiaca_promedio": 0,
+      "velocidad_kmh": 0.0,
+      "potencia_watts": 0,
+      "estado_eficiencia": "No evaluado"
+    },
+    "test_vo2max_cooper": {
+      "fecha_medicion": null,
+      "distancia_metros": 0,
+      "vo2max_estimado": 0.0,
+      "clasificacion_cooper": "No evaluado"
+    }
+  },
+  "auditoria_seguridad": {
+    "fuerza_agarre": {
+      "metodo": "hang_time",
+      "resultado_segundos": 0,
+      "estado": "Normal"
+    },
+    "acwr": {
+      "ratio_agudo_cronico": 0.00,
+      "alerta_descarga": false
+    }
+  }
+}

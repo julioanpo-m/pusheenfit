@@ -1,0 +1,58 @@
+/* css/base.css
+   RESPONSABILIDAD: Reset, Tipografía, y Variables Globales (La Atmósfera Zen).
+*/
+
+:root {
+    /* Paleta de Tensión (Trabajo Pesado) */
+    --bg-tension: #0a0a0c;        /* Negro profundo, casi abismal */
+    --text-main: #f5f5f7;         /* Blanco roto para legibilidad sin fatiga */
+    --text-muted: #86868b;        /* Gris para datos secundarios */
+    
+    /* Paleta de Recuperación (Descanso) */
+    --bg-recovery: #111a22;       /* Azul marino profundo/metálico */
+    
+    /* Paleta de Acción (Gamificación y UI) */
+    --action-color: #ff6b00;      /* Naranja de alta energía (Botón Serie Terminada) */
+    --action-press: #cc5600;      /* Naranja oscuro para feedback táctil */
+    --success-gold: #ffd700;      /* Dorado para bloques de series completadas */
+    --danger-red: #ff3b30;        /* Rojo para alertas de auditoría/ACWR */
+    
+    /* Tipografía */
+    --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-mono: "SF Mono", "Fira Code", "Roboto Mono", monospace; /* Crucial para números alineados */
+    
+    /* Transiciones */
+    --transition-slow: background-color 0.8s ease-in-out;
+    --transition-fast: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Reset Poka-Yoke */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent; /* Elimina el flash azul nativo en móviles */
+}
+
+body {
+    font-family: var(--font-ui);
+    background-color: var(--bg-tension);
+    color: var(--text-main);
+    transition: var(--transition-slow);
+    overscroll-behavior-y: none; /* Evita el "rebote" al hacer scroll en iOS */
+    user-select: none; /* Previene selección accidental de texto al entrenar */
+}
+
+/* Estados de la Máquina (El control ambiental) */
+body.state-tension {
+    background-color: var(--bg-tension);
+}
+
+body.state-recovery {
+    background-color: var(--bg-recovery);
+}
+
+/* Tipografía de Datos */
+h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.02em; }
+h2 { font-size: 1.25rem; font-weight: 500; color: var(--text-muted); }
+.mono-data { font-family: var(--font-mono); font-weight: 600; }
