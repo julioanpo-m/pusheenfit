@@ -34,11 +34,11 @@ export const BIOMECANICA = {
         }
     },
     
-    // Diccionario de Ejercicios Base (Se pueden agregar más sin romper el sistema)
+    // CORRECCIÓN FATAL APLICADA: Las llaves ahora coinciden con los Patrones Maestros
     EJERCICIOS_BASE: {
-        "press_banca_plano": { patron: "PH1", tempo_default: "3-0-1" },
-        "dominadas_lastre": { patron: "PH4", tempo_default: "3-0-1" },
-        "sentadilla_bulgara": { patron: "PH5", tempo_default: "3-0-1" },
-        "peso_muerto_rumano": { patron: "PH6", tempo_default: "4-0-1" }
+        "press_banca_plano": { patron: "EMPUJE_HORIZONTAL", tempo_default: "3-0-1" },
+        "dominadas_lastre": { patron: "TRACCION_VERTICAL", tempo_default: "3-0-1" },
+        "sentadilla_bulgara": { patron: "DOMINANTE_RODILLA", tempo_default: "3-0-1" },
+        "peso_muerto_rumano": { patron: "DOMINANTE_CADERA", tempo_default: "4-0-1" }
     }
 };
