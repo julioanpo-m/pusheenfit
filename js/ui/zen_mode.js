@@ -1,164 +1,121 @@
-// js/ui/zen_mode.js
-
 import { StateManager } from '../core/state.js';
+import { BIOMECANICA } from '../core/taxonomy.js';
 
 export const ZenModeUI = {
     wakeLock: null,
-    ejercicioActivoId: "press_banca_plano", // Ejemplo estático, vendría del RoutineManager
+    ejercicioActivoId: "press_banca_plano",
     seriesCompletadas: 0,
     totalSeries: 4,
 
     init: async function() {
-        await this.activarWakeLock();
+        try { if ('wakeLock' in navigator) { this.wakeLock = await navigator.wakeLock.request('screen'); } } catch (e) {}
         this.renderUI();
         this.bindEvents();
-        document.body.classList.add('state-tension');
-    },
-
-    activarWakeLock: async function() {
-        try {
-            if ('wakeLock' in navigator) {
-                this.wakeLock = await navigator.wakeLock.request('screen');
-                console.log('S.A.B: Wake Lock Activo. Pantalla asegurada.');
-            }
-        } catch (err) {
-            console.warn(`S.A.B: Wake Lock falló - ${err.name}, ${err.message}`);
-        }
+        document.body.className = 'state-tension';
     },
 
     renderUI: function() {
         const appRoot = document.getElementById('app-root') || document.body;
-        
-        // Construir el DOM en tiempo de ejecución para asegurar aislamiento
+        let htmlBarra = '';
+        for(let i=0; i<this.totalSeries; i++) { htmlBarra += `<div class="series-segment" id="segment-${i}"></div>`; }
+
         const zenHTML = `
             <div id="zen-container" class="zen-container">
-                <div class="series-progress-bar" id="progress-bar">
-                    ${this.generarBloquesSeries()}
-                </div>
-
+                <div class="series-progress-bar">${htmlBarra}</div>
                 <div class="exercise-header">
-                    <h1 id="ui-ejercicio-nombre">Press Banca Plano</h1>
+                    <h1>Press Banca Plano</h1>
                     <h2 class="mono-data">3-0-1 | Tempo</h2>
                 </div>
-
                 <div class="cue-drawer" id="cue-drawer">
-                    <div class="cue-header" id="cue-toggle">Desplegar Cues y Siseo ▼</div>
-                    <div class="cue-content">
-                        <p><strong>Cues:</strong> Escápulas retraídas, leg drive constante.</p>
-                        <p><strong>Siseo:</strong> Exhalación explosiva al empuje.</p>
+                    <div class="cue-header" id="cue-toggle">Desplegar Cues ▼</div>
+                    <div class="cue-content" style="color: var(--text-muted); font-size: 0.9rem;">
+                        <p><strong>Cues:</strong> Retracción escapular, leg drive.</p>
+                        <p><strong>Siseo:</strong> Exhalación explosiva al despegar.</p>
                     </div>
                 </div>
-
                 <div class="input-group">
                     <input type="number" id="input-peso" class="input-zen" placeholder="0.0" inputmode="decimal">
-                    <span style="font-size: 2rem; color: var(--text-muted); align-self: center;">kg</span>
+                    <span style="font-size: 1.5rem; color: var(--text-muted); align-self: center;">kg</span>
                 </div>
-                
                 <div class="input-group">
                     <input type="number" id="input-reps" class="input-zen" placeholder="0" inputmode="numeric">
-                    <span style="font-size: 2rem; color: var(--text-muted); align-self: center;">reps</span>
+                    <span style="font-size: 1.5rem; color: var(--text-muted); align-self: center;">reps</span>
                 </div>
-
                 <div class="input-group">
-                    <select id="input-rir" class="input-zen" style="width: auto; font-size: 1.5rem;">
-                        <option value="1">RIR 1 (Al fallo)</option>
-                        <option value="2" selected>RIR 2 (Intenso)</option>
-                        <option value="4">RIR 4 (Calentamiento)</option>
+                    <select id="input-rir" class="input-zen" style="width: auto; font-size: 1.2rem;">
+                        <option value="1">RIR 1</option><option value="2" selected>RIR 2</option><option value="4">RIR 4</option>
                     </select>
                 </div>
-
                 <div id="flash-overlay" class="flash-overlay"></div>
-                
-                <button id="btn-deshacer" class="btn-deshacer">Deshacer Última</button>
+                <div id="timer-display" style="opacity:0; font-size:4rem; font-weight:bold; color:var(--action-color); margin: 1rem 0; font-family:var(--font-mono);">00:00</div>
+                <button id="btn-deshacer" class="btn-deshacer">Deshacer</button>
                 <button id="btn-serie-terminada" class="btn-terminada">Serie Terminada</button>
+                <button id="btn-finalizar-sesion" style="background: transparent; border: 1px solid var(--danger-red); color: var(--danger-red); padding: 0.8rem; width: 100%; max-width: 300px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 1rem; z-index: 110;">FINALIZAR PROTOCOLO</button>
             </div>
         `;
-        
-        // Insertar en contenedor o adjuntar
-        const zenWrapper = document.createElement('div');
-        zenWrapper.id = "zen-wrapper";
-        zenWrapper.innerHTML = zenHTML;
-        appRoot.appendChild(zenWrapper);
-
-        // Autofocus Poka-Yoke
+        const wrap = document.createElement('div'); wrap.id = "zen-wrapper"; wrap.innerHTML = zenHTML;
+        appRoot.appendChild(wrap);
         document.getElementById('input-peso').focus();
-    },
-
-    generarBloquesSeries: function() {
-        let html = '';
-        for(let i = 0; i < this.totalSeries; i++) {
-            html += `<div class="series-segment" id="segment-${i}"></div>`;
-        }
-        return html;
     },
 
     bindEvents: function() {
         document.getElementById('btn-serie-terminada').addEventListener('click', () => this.sellarSerie());
-        
-        document.getElementById('cue-toggle').addEventListener('click', function() {
-            document.getElementById('cue-drawer').classList.toggle('open');
-        });
-
-        // UX: Poner cursor al final al tocar (Simulación para inputs tipo number/tel)
-        const pesoInput = document.getElementById('input-peso');
-        pesoInput.addEventListener('focus', function() {
-            setTimeout(() => { this.selectionStart = this.selectionEnd = this.value.length; }, 10);
-        });
+        document.getElementById('cue-toggle').addEventListener('click', () => document.getElementById('cue-drawer').classList.toggle('open'));
+        document.getElementById('btn-finalizar-sesion').addEventListener('click', () => { if(confirm("¿Descargar JSON maestro?")) this.finalizarYDescargar(); });
     },
 
     sellarSerie: function() {
-        const peso = document.getElementById('input-peso').value || 0;
-        const reps = document.getElementById('input-reps').value || 0;
+        const p = document.getElementById('input-peso').value || 0;
+        const r = document.getElementById('input-reps').value || 0;
         const rir = document.getElementById('input-rir').value;
+        if (p === 0 && r === 0) return;
 
-        if (peso === 0 && reps === 0) return; // Evitar disparos vacíos
+        const flash = document.getElementById('flash-overlay');
+        flash.classList.add('flash-active');
+        setTimeout(() => flash.classList.remove('flash-active'), 400);
 
-        // 1. Efecto Visual de Impacto
-        this.dispararFlash();
-        
-        // 2. Transición de Estado Ambiental
-        document.body.classList.remove('state-tension');
-        document.body.classList.add('state-recovery');
+        document.body.className = 'state-recovery';
+        StateManager.registrarSerie(this.ejercicioActiveId || "press_banca_plano", p, r, rir, "ninguno");
 
-        // 3. Registrar en Core
-        StateManager.registrarSerie(this.ejercicioActivoId, peso, reps, rir, "ninguno");
-
-        // 4. Actualizar Gamificación UI
         if (this.seriesCompletadas < this.totalSeries) {
             document.getElementById(`segment-${this.seriesCompletadas}`).classList.add('completed');
             this.seriesCompletadas++;
         }
-
-        // 5. Limpieza Poka-Yoke
         document.getElementById('input-peso').value = '';
         document.getElementById('input-reps').value = '';
-
-        // 6. Activar Timer de Descanso (Mock)
         this.iniciarTimerDescanso();
     },
 
-    dispararFlash: function() {
-        const flash = document.getElementById('flash-overlay');
-        flash.classList.remove('flash-active');
-        void flash.offsetWidth; // Trigger reflow
-        flash.classList.add('flash-active');
+    iniciarTimerDescanso: function() {
+        const display = document.getElementById('timer-display');
+        const ex = BIOMECANICA.EJERCICIOS_BASE[this.ejercicioActivoId];
+        let t = ex ? ex.descanso : 120;
+
+        display.style.opacity = '1';
+        const btn = document.getElementById('btn-serie-terminada');
+        btn.style.pointerEvents = 'none'; btn.style.opacity = '0.4';
+
+        const inv = setInterval(() => {
+            t--;
+            const m = Math.floor(t/60).toString().padStart(2,'0');
+            const s = (t%60).toString().padStart(2,'0');
+            display.innerText = `${m}:${s}`;
+
+            if(t <= 0) {
+                clearInterval(inv);
+                display.style.opacity = '0';
+                document.body.className = 'state-tension';
+                btn.style.pointerEvents = 'auto'; btn.style.opacity = '1';
+                document.getElementById('input-peso').focus();
+            }
+        }, 1000);
     },
 
-    iniciarTimerDescanso: function() {
-        console.log("S.A.B: Timer de descanso iniciado.");
-        const btnDeshacer = document.getElementById('btn-deshacer');
-        btnDeshacer.classList.add('visible');
-
-        // Ocultar botón deshacer después de 5 segundos
-        setTimeout(() => {
-            btnDeshacer.classList.remove('visible');
-        }, 5000);
-
-        // Simulación de fin de descanso (Pre-Flash)
-        setTimeout(() => {
-            document.body.classList.remove('state-recovery');
-            document.body.classList.add('state-tension');
-            document.getElementById('input-peso').focus();
-        }, 10000); // 10s para testing, en prod usar variable de tempo/descanso
+    finalizarYDescargar: function() {
+        if (this.wakeLock) this.wakeLock.release();
+        StateManager.sellarExpediente();
+        document.getElementById('zen-wrapper').remove();
+        document.getElementById('pre-flight-container').style.display = 'block';
+        document.body.className = 'state-tension';
     }
 };
